@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>Lotus</title>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+
+        <link href="https://fonts.googleapis.com/css?family=Anonymous+Pro" rel="stylesheet">
+        <link rel="shortcut icon" href="favicon.ico">
+
+        <style>
+            body {
+                font-family: 'Anonymous Pro', monospace;
+                color; white;
+                background-color: black;
+                margin: 0px;
+                overflow: hidden;
+            }
+
+            img {
+                position: absolute;
+                height: 20%;
+                top: 38%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+            }
+
+            #timer {
+                color: white;
+                margin: 0;
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+            }
+        </style>
+    </head>
+    
+    <body>
+        <script>
+            var countDownDate = new Date("May 1, 2018 00:00:00").getTime();
+
+            var x = setInterval(function() {
+
+              var now = new Date().getTime();
+              var distance = countDownDate - now;
+
+              var days = Math.floor(distance / (1000 * 60 * 60 * 24));
+              var hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+              var minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+              var seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+              if (days < 10) {
+                  days = "0" + days;
+              }
+              if (hours < 10) {
+                  hours = "0" + hours;
+              }
+              if (minutes < 10) {
+                  minutes = "0" + minutes;
+              }
+              if (seconds < 10) {
+                  seconds = "0" + seconds;
+              }
+
+              document.getElementById("timer").innerHTML = days + "d:" + hours + "h:"
+              + minutes + "m:" + seconds + "s";
+
+              if (distance < 0) {
+                clearInterval(x);
+                document.getElementById("timer").innerHTML = "EXPIRED";
+              }
+            }, 100);
+        </script>
+
+        <img src="lotus.jpg">
+        <div id="timer"></div>
+        
+    </body>
+</html>

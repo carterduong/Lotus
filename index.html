@@ -1,81 +1,225 @@
 <!DOCTYPE html>
 <html lang="en">
 	<head>
-		<title>Lotus</title>
+		<title>test</title>
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
 
-		<link href="https://fonts.googleapis.com/css?family=Anonymous+Pro" rel="stylesheet">
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
 
 		<style>
 			body {
-				font-family: 'Anonymous Pro', monospace;
-				color; white;
-				background-color: #ca7878;
+				font-family: Helvetica;
+				background-color: #000000;
 				margin: 0px;
 				overflow: hidden;
 			}
 
-			img {
+			#info {
+				color: #fff;
 				position: absolute;
-				height: 35%;
-				top: 38%;
-				left: 50%;
-				transform: translate(-50%, -50%);
+				top: 10px;
+				width: 100%;
+				text-align: center;
+				z-index: 100;
+				display:block;
+
 			}
 
-			#timer {
-				color: white;
-				margin: 0;
-				position: absolute;
-				top: 50%;
-				left: 50%;
-				transform: translate(-50%, -50%);
+			a { color: skyblue }
+			.button { background:#999; color:#eee; padding:0.2em 0.5em; cursor:pointer }
+			.highlight { background:orange; color:#fff; }
+
+			span {
+				display: inline-block;
+				width: 60px;
+				float: left;
+				text-align: center;
 			}
+
+			.header {
+				font-family: "Big Caslon", "Book Antiqua", "Palatino Linotype", Georgia, serif;
+				font-size: 40px;
+				color: white;
+
+				position: absolute;
+				width: 100%;
+				text-align: center;
+				z-index: 100;
+				display:block;
+			}
+
 		</style>
 	</head>
 	
 	<body>
-		<script>
-			var countDownDate = new Date("May 1, 2018 00:00:00").getTime();
+		<div class="container">
+			<div class="row header">
+			<div class="col-md-12">
+			</div>
+		</div>
 
-			var x = setInterval(function() {
+		<!--
+		<script src="../build/three.js"></script>
+		<script src="../js/loaders/STLLoader.js"></script>
+		<script src="js/Detector.js"></script>
+		<script src="js/libs/stats.min.js"></script>
+		-->
 
-			  var now = new Date().getTime();
-			  var distance = countDownDate - now;
+		<script src="js/three.min.js"></script>
+		<script src="js/STLLoader.js"></script>
+		<script src="js/Detector.js"></script>
+		<script src="js/stats.min.js"></script>
 
-			  var days = Math.floor(distance / (1000 * 60 * 60 * 24));
-			  var hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-			  var minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-			  var seconds = Math.floor((distance % (1000 * 60)) / 1000);
 
-			  if (days < 10) {
-			  	days = "0" + days;
-			  }
-			  if (hours < 10) {
-			  	hours = "0" + hours;
-			  }
-			  if (minutes < 10) {
-			  	minutes = "0" + minutes;
-			  }
-			  if (seconds < 10) {
-			  	seconds = "0" + seconds;
-			  }
+		<script id="vertexShader" type="x-shader/x-vertex">
 
-			  document.getElementById("timer").innerHTML = days + "d:" + hours + "h:"
-			  + minutes + "m:" + seconds + "s";
+			float random (vec2 st) {
+				return fract(sin(dot(st.xy, vec2(12.9898,78.233))) * 43758.5453123);
+			}
 
-			  // If the count down is finished, write some text 
-			  if (distance < 0) {
-			    clearInterval(x);
-			    document.getElementById("timer").innerHTML = "EXPIRED";
-			  }
-			}, 100);
+
+			void main()	{
+				float rnd = random( position.xy );
+				vec3 newPos = vec3(position.x + rnd * 0.01, position.y + rnd * 0.01, position.z + rnd * 0.01);
+				
+
+				gl_Position = projectionMatrix * modelViewMatrix * vec4(newPos, 1.0);
+				gl_PointSize = 2.0;
+
+			}
+
 		</script>
 
-		<img src="logo.png">
-		<div id="timer">
-		</div>
-		
+		<script id="fragmentShader" type="x-shader/x-fragment">
+			uniform vec2 u_resolution;
+
+			float random (vec2 st) {
+    			return fract(sin(dot(st.xy, vec2(12.9898,78.233))) * 43758.5453123);
+			}
+
+			void main()	{
+				vec2 st = gl_FragCoord.xy;
+				float rnd = random( st );
+
+				if (rnd < 0.1) {
+					gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0);
+				}
+
+			}
+
+		</script>
+
+		<script>
+
+			if ( ! Detector.webgl ) Detector.addGetWebGLMessage();
+
+			var container, stats;
+			var camera, cameraTarget, scene, renderer;
+			var uniforms;
+
+			init();
+			animate();
+
+			function init() {
+
+				container = document.createElement( 'div' );
+				document.body.appendChild( container );
+
+				camera = new THREE.PerspectiveCamera( 35, window.innerWidth / window.innerHeight, 1, 15 );
+				camera.position.set( 3, 0.15, 3 );
+
+				cameraTarget = new THREE.Vector3( 0, 0, 0 );
+
+				scene = new THREE.Scene();
+				scene.background = new THREE.Color( 0x000000 );
+
+				// load object into scene
+				var loader = new THREE.STLLoader();
+
+				loader.load( 'models/old_volvo.stl', function ( geometry ) {
+
+					var material = new THREE.ShaderMaterial( {
+						uniforms: { },
+						vertexShader: document.getElementById( 'vertexShader' ).textContent,
+						fragmentShader: document.getElementById( 'fragmentShader' ).textContent
+					} );
+
+					var points = new THREE.Points(geometry, material);
+					points.position.set( 0, -0.5, 0 );
+					points.rotation.set( - Math.PI / 2, 0, Math.PI / 2 );
+					points.scale.set( 0.03, 0.03, 0.03 );
+					scene.add( points );
+
+				} );
+
+				/*
+				// load object into scene
+				var loader = new THREE.STLLoader();
+
+				loader.load( './models/stl/old_volvo.stl', function ( geometry ) {
+
+					var material = new THREE.PointsMaterial({ color: 0xFFFFFF, size: 0.01 });
+					var points = new THREE.Points(geometry, material);
+					points.position.set( 0, -0.5, 0 );
+					points.rotation.set( - Math.PI / 2, 0, Math.PI / 2 );					
+					points.scale.set( 0.03, 0.03, 0.03 );
+					scene.add( points );
+
+				} );
+				*/
+
+				// renderer init
+				renderer = new THREE.WebGLRenderer( { antialias: false } );
+				renderer.setPixelRatio( window.devicePixelRatio );
+				renderer.setSize( window.innerWidth, window.innerHeight );
+
+				renderer.gammaInput = true;
+				renderer.gammaOutput = true;
+
+				renderer.shadowMap.enabled = true;
+				renderer.shadowMap.renderReverseSided = false;
+
+				container.appendChild( renderer.domElement );
+
+				// stats
+				stats = new Stats();
+				container.appendChild( stats.dom );
+
+				window.addEventListener( 'resize', onWindowResize, false );
+
+			}
+
+			function onWindowResize() {
+
+				camera.aspect = window.innerWidth / window.innerHeight;
+				camera.updateProjectionMatrix();
+
+				renderer.setSize( window.innerWidth, window.innerHeight );
+
+			}
+
+			function animate() {
+
+				requestAnimationFrame( animate );
+				render();
+				stats.update();
+
+			}
+
+			function render() {
+
+				var timer = Date.now() * 0.0005;
+
+				camera.position.x = Math.cos( timer ) * 3;
+				camera.position.z = Math.sin( timer ) * 3;
+
+				camera.lookAt( cameraTarget );
+
+				renderer.render( scene, camera );
+
+			}
+
+		</script>
 	</body>
 </html>
